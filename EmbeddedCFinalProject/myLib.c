@@ -47,9 +47,13 @@ float distance(const Point p1, const Point p2) {
 	return (float)(fabs((sqrtf(power1 + power2))));
 }
 
+float slope(const Point p1, const Point p2) {
+	return (float)((p2.y - p1.y) / (p2.x - p1.x));
+}
+
 SlopeIntercept slopeIntercept(const Point p1, const Point p2) {
 	SlopeIntercept si;
-	si.slope = ((p2.y - p1.y) / (p2.x - p1.x));
+	si.slope = slope(p1, p2);
 	si.yIntercept = (-(si.slope * p1.x) + p1.y);
 	si.valid = (p1.x - p2.x) == 0 ? false:true ;
 
@@ -57,11 +61,42 @@ SlopeIntercept slopeIntercept(const Point p1, const Point p2) {
 }
 
 LinearInterp linearInterp(const Point p1, const Point p2, const float x, const bool limit) {
-	LinearInterp lerp = { 0 };
+	LinearInterp lerp;
+
+	float m = slope(p1, p2);
+	float tempY = (p1.y + (x - p1.x) * (m));
+	lerp.yValue = tempY;
+
+	if (limit) {
+		lerp.yValue = (lerp.yValue > p1.y) ? lerp.yValue : p1.y;
+		lerp.yValue = (lerp.yValue < p2.y) ? lerp.yValue : p2.y;
+		lerp.yValue = ((tempY < p1.y) && (tempY > p2.y)) ? tempY : lerp.yValue;
+	}
+
+	if ((p1.x - p2.x) == 0) {
+		lerp.yValue = 0;
+		lerp.valid = false;
+	}
+	else {
+		lerp.valid = true;
+	}
+	
 	return lerp;
 }
 
 Ieee754singleFactors  computeIeee754singleFactors(const Ieee754singlePrecision ieeeNum) {
-	Ieee754singleFactors ieee = { 0 };
+	Ieee754singleFactors ieee;
+
+	if ((ieeeNum.fields.exponent >= 0x01) && ( ieeeNum.fields.exponent <= 0xFE)) {
+		ieee.signFactor = (powf(-1, ieeeNum.fields.sign));
+		ieee.exponentFactor = (powf(2, (int)(ieeeNum.fields.exponent - 127)));
+		ieee.fractionFactor = (1 + ((float)ieeeNum.fields.fraction / (float)(1 << 23)));
+	}
+	else {
+		ieee.exponentFactor = 0;
+		ieee.fractionFactor = 0;
+		ieee.signFactor = 0;
+	}
+
 	return ieee;
 }
