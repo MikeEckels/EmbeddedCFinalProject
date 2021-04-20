@@ -4,11 +4,13 @@
 //	myLibTest.c
 //
 //	Purpose: Test driver for Embedded-C student final project.
-//	History:	31mar2015	DAM	Initial version for cToF, fToC, and nextCyl
+//	History:	07apr2021	DAM	Initial version for cToF, fToC, and nextCyl
 //										functions.
-//				09apr2015	DAM	Added tests for daysBetween, dayOfWeek, distance,
+//				12apr2021	DAM	Added tests for daysBetween, dayOfWeek, distance,
 //										slopeIntercept, and linearInterp functions.
-//				12apr2015	DAM	Added tests for computeIeee754singleFactors function.
+//				14apr2021	DAM	Added tests for computeIeee754singleFactors function.
+//				19apr2021	DAM	Added tests for string length, copy, and reverse
+//										functions.
 
 #include "myLib.h"
 
@@ -247,6 +249,104 @@ int main(void)
 			else if(*((unsigned*)&isf.exponentFactor) != tests[i].exponent)
 				++errorCount;
 			else if(*((unsigned*)&isf.fractionFactor) != tests[i].fraction)
+				++errorCount;
+		}
+	}
+
+	////////////////////////////////////////////////////////////
+	{	// test stringLength function
+
+		const struct
+		{
+			const char* const	s;
+			const unsigned		l;
+		} tests[] =	{	{"string1",			 7U},
+							{"",					 0U},
+							{"test string",	11U}
+						};
+
+		int i;
+		for(i = sizeof(tests) / sizeof(tests[0]) - 1; i >= 0; i--)
+		{
+			if(stringLength(tests[i].s) != tests[i].l)
+				++errorCount;
+		}
+	}
+
+	////////////////////////////////////////////////////////////
+	{	// test stringCopy function
+
+		const struct
+		{
+			const char* const	s;
+			const unsigned		l;
+		} tests[] =	{	{"string1",			 7U},
+							{"",					 0U},
+							{"test string",	11U}
+						};
+
+		char	myBuff[32];
+		int	i;
+
+		for(i = sizeof(tests) / sizeof(tests[0]) - 1; i >= 0; i--)
+		{
+			if(stringCopy(tests[i].s, myBuff) == tests[i].l)
+			{
+				int index = (int)(tests[i].l);
+				do
+				{
+					if(tests[i].s[index] != myBuff[index])
+					{
+						++errorCount;
+						break;
+					}
+				}while(--index >= 0);
+			}
+			else
+				++errorCount;
+		}
+	}
+
+
+	////////////////////////////////////////////////////////////
+	{	// test stringReverse function
+
+		const struct
+		{
+			const char* const	s;
+			const unsigned		l;
+		} tests[] =	{	{"string1",			 7U},
+							{"",					 0U},
+							{"test string",	11U}
+						};
+
+		char	myBuff[32];
+		int	i;
+
+		for(i = sizeof(tests) / sizeof(tests[0]) - 1; i >= 0; i--)
+		{
+			if(stringReverse(tests[i].s, myBuff) == tests[i].l)
+			{
+				int indexR = (int)(tests[i].l);
+
+				if(myBuff[indexR] != '\0')
+					++errorCount;
+				else
+				{
+					int indexL = 0;
+					while(--indexR >= 0)
+					{
+						if(myBuff[indexL] != tests[i].s[indexR])
+						{
+							++errorCount;
+							break;
+						}
+
+						++indexL;
+					}
+				}
+			}
+			else
 				++errorCount;
 		}
 	}

@@ -14,6 +14,7 @@
 //										Changed date functions to use new Date structure.
 //				14apr2021	DAM	Added computeIeee754singleFactors function and
 //										associated data types.
+//				19apr2021	DAM	Added string length, copy, and reverse functions.
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -176,5 +177,21 @@ typedef struct _Ieee754singleFactors
 // and then add one to that result.
 
 Ieee754singleFactors  computeIeee754singleFactors(const Ieee754singlePrecision);
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// returns number of characters in C string (excluding the terminating null)
+unsigned stringLength(const char* const pS);
+
+// copy string in 1st parameter to address starting at 2nd paramenter
+// return number of characters copied (excluding the terminating null)
+unsigned stringCopy(const char* const from, char* to);
+
+// reverse the non-null characters in 'from' string placing the result into
+// 'to' string (i.e., "abcd" becomes "dcba".
+// return the number of characters copied (excluding the terminating null)
+unsigned stringReverse(const char* const from, char* to);
 
 #endif
