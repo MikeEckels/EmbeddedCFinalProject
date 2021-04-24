@@ -1,5 +1,6 @@
 #include "myLib.h"
 #include <Math.h>
+#include <string.h>
 
 float cToF(float degC) {
 	return (float)(degC * (9.0F / 5.0F) + 32.0F);
@@ -99,4 +100,30 @@ Ieee754singleFactors  computeIeee754singleFactors(const Ieee754singlePrecision i
 	}
 
 	return ieee;
+}
+
+unsigned stringLength(const char* const pS) {
+	unsigned i;
+	for (i = 0; pS[i] != '\0'; i++) {}
+	return (i);
+}
+
+unsigned stringCopy(const char* const from, char* to) {
+	unsigned i;
+	for (i = 0; from[i] != '\0'; i++) {
+		to[i] = from[i];
+	}
+	to[i] = '\0';
+
+	return(i);
+}
+
+unsigned stringReverse(const char* const from, char* to) {
+	unsigned len = stringLength(from);
+
+	for (unsigned i = 0; i < len; i++) {
+		to[i] = from[(len - 1) - i];
+	}
+	to[len] = '\0';
+	return(len);
 }
