@@ -11,9 +11,10 @@
 //				14apr2021	DAM	Added tests for computeIeee754singleFactors function.
 //				19apr2021	DAM	Added tests for string length, copy, and reverse
 //										functions.
+//				21apr2021	DAM	Added tests for int linked list functions.
 
 #include "myLib.h"
-
+#include <stdio.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 int main(void)
@@ -349,6 +350,308 @@ int main(void)
 			else
 				++errorCount;
 		}
+	}
+
+
+	////////////////////////////////////////////////////////////
+	{	// test linked list functions
+
+		IntList			myList;
+		IntListNode*	pNode;
+		int				i;
+
+		///////////////////////////////////////////
+		// test intListInit function
+		myList.pHead		= (IntListNode*)-1;
+		myList.pTail		= (IntListNode*)-1;
+		myList.numEntries	= -1;
+
+		intListInit(&myList);
+
+		if(myList.pHead != NULL)
+			++errorCount;
+
+		if(myList.pTail != NULL)
+			++errorCount;
+
+		if(myList.numEntries != 0)
+			++errorCount;
+
+		///////////////////////////////////////////
+		// insert a bunch of elements
+
+		const int MAX_VALUE = 500;
+		{
+			int j;
+			for(i = 2, j = MAX_VALUE - 1; i <= MAX_VALUE; i += 2, j -= 2)
+			{
+				if(intListInsert(&myList, i) != INT_LIST_OK)
+				{
+					++errorCount;
+					break;
+				}
+
+				if(intListInsert(&myList, j) != INT_LIST_OK)
+				{
+					++errorCount;
+					break;
+				}
+			}
+		}
+
+		if(myList.numEntries != MAX_VALUE)
+			++errorCount;
+
+		///////////////////////////////////////////
+		// verify data in each node is correct top to bottom
+		for(i = 1, pNode = myList.pHead; pNode != NULL; pNode = pNode->pNext, i++)
+		{
+			if(pNode->value != i)
+			{
+				++errorCount;
+				break;
+			}
+		}
+
+		///////////////////////////////////////////
+		// verify data in each node is correct bottom to top
+		for(i = myList.numEntries, pNode = myList.pTail; pNode != NULL; pNode = pNode->pPrev, i--)
+		{
+			if(pNode->value != i)
+			{
+				++errorCount;
+				break;
+			}
+		}
+
+		///////////////////////////////////////////
+		// verify the intListFind function
+		pNode = intListFind(&myList, 1);
+		if((pNode == NULL) || (pNode != myList.pHead) || (pNode->value != 1))
+			++errorCount;
+
+		pNode = intListFind(&myList, myList.numEntries);
+		if((pNode == NULL) || (pNode != myList.pTail) || (pNode->value != myList.numEntries))
+			++errorCount;
+
+		// some random finds
+		pNode = intListFind(&myList, 21);
+		if((pNode == NULL) || (pNode->value != 21))
+			++errorCount;
+
+		pNode = intListFind(&myList, MAX_VALUE);
+		if((pNode == NULL) || (pNode->value != MAX_VALUE))
+			++errorCount;
+
+		///////////////////////////////////////////
+		// verify the intListDelete function
+		{
+			unsigned oldNumEntries = myList.numEntries;
+
+			// should fail, picking a number that is not in the list
+			if(intListDelete(&myList, myList.numEntries + 1) != false)
+				++errorCount;
+
+			// numEntries should not have changed
+			if(myList.numEntries != oldNumEntries)
+				++errorCount;
+
+			// delete tail node
+			// should succeed, picking a number that is in the list
+			if(intListDelete(&myList, myList.numEntries) != true)
+				++errorCount;
+
+			// numEntries should have gone down by one
+			if(myList.numEntries != (oldNumEntries - 1))
+				++errorCount;
+
+			// tail pointer should have been adjusted to new tail node
+			if(myList.pTail->value != myList.numEntries)
+				++errorCount;
+
+			// remove a non-head/non-tail node
+			// make sure there are enough nodes in the list to do the test
+			// supposed to be as we should have allocated 16k for the heap
+			if(myList.numEntries > 2)
+			{
+				oldNumEntries = myList.numEntries;
+				if(intListDelete(&myList, 2) != true)
+					++errorCount;
+
+				if(myList.numEntries != (oldNumEntries - 1))
+					++errorCount;
+
+				///////////////////////////////////////////
+				// verify data in each node is correct top to bottom
+				for(i = 1, pNode = myList.pHead; pNode != NULL; pNode = pNode->pNext, i++)
+				{
+					if(i == 2)
+						++i; // skip 2, this is the one we just deleted
+
+					if(pNode->value != i)
+					{
+						++errorCount;
+						break;
+					}
+				}
+
+				///////////////////////////////////////////
+				// verify data in each node is correct bottom to top
+				for(i = myList.numEntries + 1, pNode = myList.pTail; pNode != NULL; pNode = pNode->pPrev, i--)
+				{
+					if(i == 2)
+						--i; // skip 2, this is the one we just deleted
+
+					if(pNode->value != i)
+					{
+						++errorCount;
+						break;
+					}
+				}
+			}
+			else
+				++errorCount;
+
+			// remove head node
+			oldNumEntries = myList.numEntries;
+			if(intListDelete(&myList, 1) != true)
+				++errorCount;
+
+			if(myList.numEntries != (oldNumEntries - 1))
+				++errorCount;
+
+			// verify list is still completely correct top to bottom
+			for(i = 3, pNode = myList.pHead; pNode != NULL; pNode = pNode->pNext, i++)
+			{
+				if(pNode->value != i)
+				{
+					++errorCount;
+					break;
+				}
+			}
+
+			// verify list is still completely correct bottom to top
+			for(i = myList.pTail->value, pNode = myList.pTail; pNode != NULL; pNode = pNode->pPrev, i--)
+			{
+				if(pNode->value != i)
+				{
+					++errorCount;
+					break;
+				}
+			}
+		}
+
+		///////////////////////////////////////////
+		// verify the intListClear function
+
+		intListClear(&myList);
+
+		if(myList.pHead != NULL)
+			++errorCount;
+
+		if(myList.pTail != NULL)
+			++errorCount;
+
+		if(myList.numEntries != 0)
+			++errorCount;
+
+		///////////////////////////////////////////
+		// verify can properly insert nodes in any location
+
+		// first node
+		if(intListInsert(&myList, 2) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 1)
+			++errorCount;
+
+		if(myList.pHead != myList.pTail)
+			++errorCount;
+
+		// non-empty list new head node
+		if(intListInsert(&myList, 1) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 2)
+			++errorCount;
+
+		if(myList.pHead == myList.pTail)
+			++errorCount;
+
+		if(myList.pHead->value != 1)
+			++errorCount;
+
+		if(myList.pTail->value != 2)
+			++errorCount;
+
+		// non-empty list new tail node
+		if(intListInsert(&myList, 4) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 3)
+			++errorCount;
+
+		if(myList.pHead->value != 1)
+			++errorCount;
+
+		if(myList.pTail->value != 4)
+			++errorCount;
+
+		// non-empty list intermediate node
+		if(intListInsert(&myList, 3) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 4)
+			++errorCount;
+
+		if(myList.pHead->value != 1)
+			++errorCount;
+
+		if(myList.pTail->value != 4)
+			++errorCount;
+
+		// check the whole list top to bottom
+		for(i = 1, pNode = myList.pHead; pNode != NULL; pNode = pNode->pNext, i++)
+		{
+			if(pNode->value != i)
+			{
+				++errorCount;
+				break;
+			}
+		}
+
+		// check the whole list bottom to top
+		for(i = 4, pNode = myList.pTail; pNode != NULL; pNode = pNode->pPrev, i--)
+		{
+			if(pNode->value != i)
+			{
+				++errorCount;
+				break;
+			}
+		}
+
+		///////////////////////////////////////////
+		// verify cannot insert duplicate
+		for(i = 1; i <= 4; i++)
+		{
+			if(intListInsert(&myList, i) != INT_LIST_ERROR_DUPLICATE)
+			{
+				++errorCount;
+				break;
+			}
+		}
+
+		if(intListInsert(&myList, 5) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 5)
+			++errorCount;
+
+		if(intListInsert(&myList, -1) != INT_LIST_OK)
+			++errorCount;
+
+		if(myList.numEntries != 6)
+			++errorCount;
 	}
 
 

@@ -15,6 +15,7 @@
 //				14apr2021	DAM	Added computeIeee754singleFactors function and
 //										associated data types.
 //				19apr2021	DAM	Added string length, copy, and reverse functions.
+//				21apr2021	DAM	Added integer linked list structures/functions.
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -193,5 +194,72 @@ unsigned stringCopy(const char* const from, char* to);
 // 'to' string (i.e., "abcd" becomes "dcba".
 // return the number of characters copied (excluding the terminating null)
 unsigned stringReverse(const char* const from, char* to);
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+typedef struct _IntListNode
+{
+	struct _IntListNode*	pPrev;
+	int						value;
+	struct _IntListNode*	pNext;
+
+}IntListNode;
+
+////////////////////////////////////////////////////////////////////////////////
+typedef struct _IntList
+{
+	IntListNode*	pHead;
+	IntListNode*	pTail;
+	unsigned			numEntries;
+}IntList;
+
+////////////////////////////////////////////////////////////////////////////////
+typedef enum _IntListStatus
+{
+	INT_LIST_OK,
+	INT_LIST_ERROR_DUPLICATE,
+	INT_LIST_ERROR_NO_MEMORY
+}IntListStatus;
+
+////////////////////////////////////////////////////////////////////////////////
+// Initializes the structure pointed to by pList by setting the head/tail to null
+// and the number of entries to 0.  Must be called exactly once for a given list
+// object and that call must occur before any other of the 'intList' functions.
+
+void intListInit(IntList* pList);
+
+////////////////////////////////////////////////////////////////////////////////
+// Inserts newInt into list in ascending order.
+// Duplicate values are not accepted.
+// Returns:
+//		INT_LIST_OK              - insertion was successful
+//		INT_LIST_ERROR_DUPLICATE - insertion failed, user tried to insert a duplicate
+//		INT_LIST_ERROR_NO_MEMORY - insertion failed, could not allocate memory
+
+IntListStatus	intListInsert(IntList* pList, int newInt);
+
+////////////////////////////////////////////////////////////////////////////////
+// Searches the specified list for the specified value
+// Returns:
+//		If the value is found in the list, returns a pointer to the associated
+//		IntListNode, otherwise returns a null pointer.
+
+IntListNode* intListFind(IntList* pList, int findVal);
+
+////////////////////////////////////////////////////////////////////////////////
+// Deletes the node containing deleteVal, if found.
+// Returns:
+//		true  - deleteVal was found (and the node was freed/deleted).
+//		false - deleteVal was not found.
+
+bool intListDelete(IntList* pList, int deleteVal);
+
+////////////////////////////////////////////////////////////////////////////////
+// Clears the entire specified list, freeing all nodes in the list, and sets
+// the object referenced by pList back to its initial state (i.e., head/tail
+// pointers set to null and number of entries set to 0.
+
+void intListClear(IntList* pList);
 
 #endif
