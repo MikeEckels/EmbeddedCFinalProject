@@ -127,3 +127,113 @@ unsigned stringReverse(const char* const from, char* to) {
 	to[len] = '\0';
 	return(len);
 }
+
+void intListInit(IntList* pList) {
+	pList->pHead = NULL;
+	pList->pTail = NULL;
+	pList->numEntries = 0;
+}
+
+IntListStatus intListInsert(IntList* pList, int newInt) {
+	IntListNode* newNode;
+	IntListNode* prevNode = NULL;
+	IntListNode* currentNode = pList->pHead;
+	IntListStatus status = 1;
+
+	while (currentNode && (currentNode->value < newInt)) { //Go to the biggest value below newInt so we can add in ascending order
+		prevNode = currentNode;
+		currentNode = currentNode->pNext;
+	}
+
+	if (currentNode && (currentNode->value == newInt)) { //If duplicate return fail
+		return status;
+	}
+
+	newNode = (IntListNode*)malloc(sizeof(IntListNode));
+	if (newNode != NULL) {//If malloc succeded
+		newNode->value = newInt;
+		newNode->pPrev = NULL;
+		newNode->pNext = NULL;
+
+		if (pList->numEntries == 0) { //If list is empty
+			pList->pHead = newNode;
+			pList->pTail = newNode;
+		}
+		else if (currentNode == NULL) { //If list was just initialized
+			pList->pTail->pNext = newNode;
+			pList->pTail = newNode;
+		}
+		else if (currentNode == pList->pHead) {
+			newNode->pNext = pList->pHead;
+			pList->pHead = newNode;
+		}
+		else {
+			prevNode->pNext = newNode;
+			newNode->pNext = currentNode;
+		}
+
+		++pList->numEntries;
+		status = 0;//Sucessfully added node
+	}
+	else {
+		status = 2;//Return fail if malloc fails
+	}
+
+	return (IntListStatus)status;
+}
+
+IntListNode* intListFind(IntList* pList, int findVal) {
+	IntListNode* node = pList->pHead;
+	while (node != NULL) {
+		if (node->value == findVal) {
+			return node;
+		}
+		node = node->pNext;
+	}
+	return NULL;
+}
+
+bool intListDelete(IntList* pList, int deleteVal) {
+	IntListNode* prevNode = NULL;
+	IntListNode* deleteNode = pList->pHead;
+
+	while (deleteNode && (deleteNode->value < deleteVal)) {
+		prevNode = deleteNode;
+		deleteNode = deleteNode->pNext;
+	}
+
+	if (deleteNode == NULL || (deleteNode->value != deleteVal)) {
+		return false;
+	}
+
+	if (pList->numEntries == 1) {
+		pList->pHead = NULL;
+		pList->pTail = NULL;
+	}
+	else if (deleteNode == pList->pHead) {
+		pList->pHead = pList->pHead->pNext;
+	}
+	else if (deleteNode == pList->pTail) {
+		pList->pTail = prevNode;
+		pList->pTail->pNext = NULL;
+	}
+	else {
+		prevNode->pNext = deleteNode->pNext;
+	}
+
+	free(deleteNode);
+	--pList->numEntries;
+	return true;
+}
+
+void intListClear(IntList* pList) {
+	IntListNode* deleteNode;
+	IntListNode* currentNode = pList->pHead;
+
+	while (currentNode != NULL) {
+		deleteNode = currentNode;
+		currentNode = currentNode->pNext;
+		free(deleteNode);
+	}
+	intListInit(pList);
+}
