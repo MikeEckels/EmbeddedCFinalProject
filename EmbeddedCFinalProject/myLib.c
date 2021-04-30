@@ -2,6 +2,8 @@
 #include <Math.h>
 #include <stdlib.h>
 
+int numDays(Date d1); //Function Prototype
+
 float cToF(float degC) {
 	return (float)(degC * (9.0F / 5.0F) + 32.0F);
 }
@@ -89,8 +91,8 @@ Ieee754singleFactors  computeIeee754singleFactors(const Ieee754singlePrecision i
 	Ieee754singleFactors ieee;
 
 	if ((ieeeNum.fields.exponent >= 0x01) && ( ieeeNum.fields.exponent <= 0xFE)) {
-		ieee.signFactor = (powf(-1, ieeeNum.fields.sign));
-		ieee.exponentFactor = (powf(2, (int)(ieeeNum.fields.exponent - 127)));
+		ieee.signFactor = (float)(powf(-1, (float)ieeeNum.fields.sign));
+		ieee.exponentFactor = (powf(2, (float)(ieeeNum.fields.exponent - 127.0F)));
 		ieee.fractionFactor = (1 + ((float)ieeeNum.fields.fraction / (float)(1 << 23)));
 	}
 	else {
