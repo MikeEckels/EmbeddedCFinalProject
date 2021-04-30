@@ -1,6 +1,6 @@
 #include "myLib.h"
 #include <Math.h>
-#include <string.h>
+#include <stdlib.h>
 
 float cToF(float degC) {
 	return (float)(degC * (9.0F / 5.0F) + 32.0F);
